@@ -7,6 +7,10 @@ Tested on 2026-10-10 with Discord 1.0.9261 x64 and Clash Verge SOCKS5 at
   Windows DNS returned a poisoned address and unmodified Discord timed out.
 - The patched installer launched Discord normally. Updates completed, the
   gateway connected, and the voice connection reached CONNECTED.
+- A normal in-app host upgrade from 1.0.9253 to 1.0.9261 preserved all three
+  proxy files byte-for-byte. The updated client loaded both patch DLLs and
+  connected to the gateway after a normal launcher restart, with TUN off. See
+  [UPDATE-TEST.md](UPDATE-TEST.md).
 - The user confirmed that this exact installer also worked on their physical
   Windows x64 PC, including voice, with TUN disabled.
 - Offline DNS parser tests passed on macOS and Windows. They cover compression,

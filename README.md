@@ -48,13 +48,15 @@ DNS diagnostics are written to `%LOCALAPPDATA%\DiscordProxy\dns.log`. They conta
 
 Discord 1.0.9261 x64 started, completed updates, connected to the gateway, and joined voice with TUN off. This worked in a Windows 11 ARM64 Parallels VM running the x64 client under emulation, and the maintainer confirmed the same executable worked on their physical Windows x64 PC.
 
+The original update-survival hook is retained. An older official x64 client, **1.0.9253**, was patched with the released v0.1 installer and allowed to update itself to **1.0.9261** with TUN off. The new app folder inherited both DLLs and `proxy.txt` with identical hashes, and the updated client connected after a normal launcher restart. See the [update test](docs/UPDATE-TEST.md).
+
 The DNS parser and live resolver probes were also tested. See [validation details](docs/VALIDATION.md). Longer-term stability and a precise CPU-overhead comparison have not been established.
 
 ## Limitations
 
 - Windows x64 payload only; IPv4 sockets only, inherited from the upstream wrapper.
 - SOCKS5 UDP support is required for voice.
-- Discord updates may replace the application folder and require reinstalling the patch.
+- Normal in-app host updates carry the patch to the new app folder using the upstream loader hook; the verified transition is 1.0.9253 → 1.0.9261. A clean reinstall may require applying the installer again.
 - The original transport hooks remain largely unchanged. This is not a complete rewrite or audit of their asynchronous socket handling.
 - Cloudflare DoH is hardcoded for this personal setup.
 
