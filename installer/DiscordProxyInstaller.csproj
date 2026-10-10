@@ -5,6 +5,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <PayloadDirectory Condition="'$(PayloadDirectory)' == ''">../x64/Release</PayloadDirectory>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,8 +14,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="../x64/Release/DWrite.dll" />
-    <EmbeddedResource Include="../x64/Release/force-proxy.dll" />
+    <EmbeddedResource Include="$(PayloadDirectory)/DWrite.dll" LogicalName="DiscordProxyInstaller.DWrite.dll" />
+    <EmbeddedResource Include="$(PayloadDirectory)/force-proxy.dll" LogicalName="DiscordProxyInstaller.force-proxy.dll" />
   </ItemGroup>
 
 </Project>

@@ -6,6 +6,7 @@
 #include <filesystem>
 #include <detours/detours.h>
 #include "proxy.h"
+#include "browser_proxy.h"
 
 namespace fs = std::filesystem;
 
@@ -122,6 +123,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
 		OrignalDWriteCreateFactory = (uintptr_t)GetProcAddress(OriginalDLL, "DWriteCreateFactory");
 
 		LoadForceProxy();
+		AttachBrowserProxy();
 		DetourRestoreAfterWith();
 		DetourTransactionBegin();
 		DetourUpdateThread(GetCurrentThread());
@@ -132,6 +134,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
 	}
 	case DLL_PROCESS_DETACH:
 	{
+		DetachBrowserProxy();
 		DetourTransactionBegin();
 		DetourUpdateThread(GetCurrentThread());
 		DetourDetach((PVOID*)(&Real_CreateProcessW), Mine_CreateProcessW);

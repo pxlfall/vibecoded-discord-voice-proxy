@@ -400,3 +400,13 @@ FodyWeavers.xsd
 *.sln.iml
 
 vcpkg_installed/
+# Local builds and diagnostics
+build/
+build-*/
+vcpkg_installed/
+*.dll
+*.exe
+*.zip
+proxy.txt
+performance/
+dist/

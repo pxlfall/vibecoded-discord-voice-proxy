@@ -25,6 +25,13 @@ namespace DiscordProxyInstaller
                 return;
             }
 
+            if (!Discord.IsX64())
+            {
+                Console.WriteLine("This installer requires x64 Discord. Your installed Discord uses a different architecture.");
+                Console.ReadLine();
+                return;
+            }
+
             if (Discord.IsInstalled() && Ask("Already installed, want to uninstall?", false))
             {
                 Discord.Uninstall();
@@ -32,6 +39,15 @@ namespace DiscordProxyInstaller
             }
 
             var process = Process.GetProcesses().Select(p => p.ProcessName.ToLower()).ToList();
+
+            if (process.Contains("clash-verge") || process.Contains("verge-mihomo"))
+            {
+                if (Ask("Found Clash Verge. Use SOCKS5 at 127.0.0.1:7897 with Cloudflare DNS over HTTPS?"))
+                {
+                    Discord.InstallAndRun("127.0.0.1", "7897");
+                    return;
+                }
+            }
 
             if (process.Contains("v2rayn"))
             {
