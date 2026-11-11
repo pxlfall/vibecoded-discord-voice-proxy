@@ -13,5 +13,8 @@ typedef struct {
 
 int ConnectThroughSocks5(SOCKET s, const struct sockaddr_in* targetAddr, bool nonBlocking);
 bool InitializeSocks5UdpAssociation(udp_association_entry_t* entry);
-void EncapsulateUDPPacket(WSABUF* target, char* buf, int len, const sockaddr* lpTo);
-void ExtractSockAddr(char* buf, sockaddr* target);
+// Builds one SOCKS5 UDP datagram from all buffers. Caller frees target->buf.
+bool EncapsulateUDPBuffers(WSABUF* target, const WSABUF* buffers, DWORD count, const sockaddr* lpTo);
+// Strips the SOCKS5 UDP header in place, updates *bytes and the sender address.
+// Returns false (and sets *bytes to 0) for malformed or fragmented datagrams.
+bool DecapsulateUDPBuffers(const WSABUF* buffers, DWORD count, DWORD* bytes, sockaddr* from, LPINT fromlen);

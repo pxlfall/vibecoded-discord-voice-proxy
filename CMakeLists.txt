@@ -31,6 +31,12 @@ add_test(NAME dns_wire COMMAND dns_wire_test)
 add_executable(proxy_dns_probe "${FORCE_PROXY_SOURCE}/../tests/proxy_dns_probe.cpp")
 target_link_libraries(proxy_dns_probe PRIVATE ws2_32)
 set_target_properties(proxy_dns_probe PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/payload")
+# Live UDP hook test: loads force-proxy.dll and sends DNS queries through the
+# SOCKS5 proxy in every send/receive mode (blocking, multi-buffer, overlapped
+# event, IOCP, completion routine). Needs a running proxy with UDP support.
+add_executable(udp_hooks_test "${FORCE_PROXY_SOURCE}/../tests/udp_hooks_test.cpp")
+target_link_libraries(udp_hooks_test PRIVATE ws2_32)
+set_target_properties(udp_hooks_test PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/payload")
 add_executable(dns_perf_test "${FORCE_PROXY_SOURCE}/../tests/dns_perf_test.cpp")
 target_link_libraries(dns_perf_test PRIVATE ws2_32 psapi)
 set_target_properties(dns_perf_test PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/payload")

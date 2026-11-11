@@ -64,9 +64,14 @@ BOOL __stdcall Mine_CreateProcessW(LPCWSTR lpApplicationName,
 			auto currentDir = fs::path(currentPath).parent_path();
 			auto targetDir = fs::path(targetAppName).parent_path();
 
+			// Use the non-throwing overloads: an exception escaping this hook
+			// would terminate the updater. A failed copy only means the new
+			// version starts without the proxy; the launch itself must proceed.
 			for (const auto& file : files) {
-				if (fs::exists(currentDir.wstring() + L"\\" + file)) {
-					fs::copy(currentDir.wstring() + L"\\" + file, targetDir.wstring() + L"\\" + file, fs::copy_options::overwrite_existing);
+				std::error_code error;
+				const auto source = currentDir / file;
+				if (fs::exists(source, error) && !error) {
+					fs::copy(source, targetDir / file, fs::copy_options::overwrite_existing, error);
 				}
 			}
 		}
@@ -84,12 +89,30 @@ BOOL __stdcall Mine_CreateProcessW(LPCWSTR lpApplicationName,
 		lpProcessInformation);
 }
 
-void LoadForceProxy()
+// Directory containing this DLL (beside Discord.exe), independent of the
+// process's current working directory.
+fs::path ModuleDirectory(HMODULE module)
 {
-	std::ifstream file("proxy.txt");
+	std::wstring path(MAX_PATH, L'\0');
+	for (;;) {
+		const DWORD length = GetModuleFileNameW(module, path.data(), static_cast<DWORD>(path.size()));
+		if (length == 0) return {};
+		if (length < path.size()) {
+			path.resize(length);
+			return fs::path(path).parent_path();
+		}
+		path.resize(path.size() * 2);
+	}
+}
+
+void LoadForceProxy(HMODULE module)
+{
+	const auto directory = ModuleDirectory(module);
+	std::ifstream file(directory / L"proxy.txt");
 	std::string line;
 
 	while (file.is_open() && getline(file, line)) {
+		if (!line.empty() && line.back() == '\r') line.pop_back();
 		std::stringstream ss(line);
 
 		std::string key, value;
@@ -98,7 +121,8 @@ void LoadForceProxy()
 		}
 	}
 
-	if (LoadLibraryA("force-proxy.dll") == NULL) {
+	const auto forceProxy = directory.empty() ? fs::path(L"force-proxy.dll") : directory / L"force-proxy.dll";
+	if (LoadLibraryW(forceProxy.c_str()) == NULL) {
 		char text[MAX_PATH];
 		_snprintf_s(text, sizeof(text), "Cannot load force-proxy.dll. Error code: %d", GetLastError());
 		MessageBoxA(0, text, "Proxy", MB_ICONERROR);
@@ -122,7 +146,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
 		}
 		OrignalDWriteCreateFactory = (uintptr_t)GetProcAddress(OriginalDLL, "DWriteCreateFactory");
 
-		LoadForceProxy();
+		LoadForceProxy(hModule);
 		AttachBrowserProxy();
 		DetourRestoreAfterWith();
 		DetourTransactionBegin();
